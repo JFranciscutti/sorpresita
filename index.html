@@ -1,0 +1,587 @@
+<!doctype html>
+<html lang="es">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Un finde en Tandil</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Great+Vibes&family=Cormorant+Garamond:ital,wght@0,400;0,600;1,400&family=Montserrat:wght@400;600&display=swap"
+      rel="stylesheet"
+    />
+    <style>
+      :root {
+        --bg: #f6f1e7;
+        --ink: #3b2a1e;
+        --lav: #7b5ea7;
+        --org: #e08a4b;
+        --card: #fffdf8;
+      }
+      * {
+        box-sizing: border-box;
+      }
+      html,
+      body {
+        margin: 0;
+        background: var(--bg);
+        color: var(--ink);
+        font-family: Montserrat, sans-serif;
+      }
+      main {
+        max-width: 860px;
+        margin: 0 auto;
+        padding: 40px 20px 80px;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+      }
+      .step {
+        width: 100%;
+        display: none;
+        flex-direction: column;
+        align-items: center;
+        text-align: center;
+        animation: fade 0.6s ease;
+      }
+      .step.on {
+        display: flex;
+      }
+      @keyframes fade {
+        from {
+          opacity: 0;
+          transform: translateY(12px);
+        }
+        to {
+          opacity: 1;
+          transform: none;
+        }
+      }
+      .kicker {
+        font-size: 13px;
+        letter-spacing: 5px;
+        text-transform: uppercase;
+        color: var(--lav);
+        margin: 0;
+      }
+      h1,
+      h2 {
+        font-family: "Great Vibes", cursive;
+        font-weight: 400;
+        margin: 6px 0 0;
+        line-height: 1.1;
+      }
+      h1 {
+        font-size: 72px;
+      }
+      h2 {
+        font-size: 56px;
+      }
+      p.lead {
+        font-family: "Cormorant Garamond", serif;
+        font-style: italic;
+        font-size: 24px;
+        margin: 10px 0 0;
+        color: var(--org);
+      }
+      button {
+        font: inherit;
+        cursor: pointer;
+        border: none;
+        border-radius: 999px;
+        padding: 14px 28px;
+        background: var(--ink);
+        color: var(--bg);
+        font-size: 15px;
+        letter-spacing: 1px;
+        margin-top: 28px;
+        transition: transform 0.2s;
+      }
+      button:hover {
+        transform: translateY(-2px);
+      }
+      button:disabled {
+        opacity: 0.35;
+        cursor: default;
+        transform: none;
+      }
+      button.ghost {
+        background: transparent;
+        color: var(--ink);
+        border: 1.5px solid var(--ink);
+      }
+      /* Paso 1: sobre */
+      .envelope {
+        position: relative;
+        width: 300px;
+        height: 200px;
+        margin-top: 40px;
+        cursor: pointer;
+        perspective: 800px;
+      }
+      .env-body {
+        position: absolute;
+        inset: 0;
+        background: var(--lav);
+        border-radius: 10px;
+        box-shadow: 0 10px 24px rgba(59, 42, 30, 0.25);
+      }
+      .env-flap {
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        height: 50%;
+        background: #6a4f96;
+        clip-path: polygon(0 0, 100% 0, 50% 100%);
+        transform-origin: top;
+        transition: transform 0.7s ease;
+        border-radius: 10px 10px 0 0;
+      }
+      .env-card {
+        position: absolute;
+        left: 20px;
+        right: 20px;
+        top: 20px;
+        bottom: 20px;
+        background: var(--card);
+        border-radius: 6px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-family: "Great Vibes", cursive;
+        font-size: 38px;
+        transition: transform 0.8s ease 0.3s;
+      }
+      .envelope.open .env-flap {
+        transform: rotateX(180deg);
+      }
+      .envelope.open .env-card {
+        transform: translateY(-70px);
+      }
+      .hint {
+        font-size: 14px;
+        color: var(--ink);
+        opacity: 0.7;
+        margin-top: 14px;
+      }
+      /* Paso 2: recuerdos */
+      .memories {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 18px;
+        width: 100%;
+        margin-top: 30px;
+      }
+      .mem {
+        position: relative;
+        height: 200px;
+        perspective: 900px;
+        cursor: pointer;
+        border: none;
+        background: none;
+        padding: 0;
+        margin: 0;
+        border-radius: 16px;
+      }
+      .mem-inner {
+        position: absolute;
+        inset: 0;
+        transition: transform 0.7s;
+        transform-style: preserve-3d;
+      }
+      .mem.flipped .mem-inner {
+        transform: rotateY(180deg);
+      }
+      .mem-front,
+      .mem-back {
+        position: absolute;
+        inset: 0;
+        border-radius: 16px;
+        backface-visibility: hidden;
+        -webkit-backface-visibility: hidden;
+        overflow: hidden;
+        box-shadow: 0 6px 18px rgba(59, 42, 30, 0.18);
+      }
+      .mem-front {
+        background: var(--lav);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: var(--bg);
+        font-family: "Cormorant Garamond", serif;
+        font-size: 26px;
+        font-style: italic;
+      }
+      .mem-back {
+        transform: rotateY(180deg);
+        background: var(--card);
+      }
+      .mem-back img {
+        width: 100%;
+        height: 70%;
+        object-fit: cover;
+        display: block;
+      }
+      .mem-back span {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        height: 30%;
+        font-family: "Cormorant Garamond", serif;
+        font-size: 22px;
+        color: var(--ink);
+      }
+      .counter {
+        font-size: 13px;
+        letter-spacing: 2px;
+        color: var(--lav);
+        margin-top: 14px;
+        text-transform: uppercase;
+      }
+      /* Paso 3: corazón */
+      .heart {
+        width: 150px;
+        height: 150px;
+        margin-top: 40px;
+        background: var(--org);
+        border: none;
+        border-radius: 0;
+        padding: 0;
+        cursor: pointer;
+        clip-path: path(
+          "M75 135 C10 90 0 55 0 35 C0 12 18 0 38 0 C55 0 68 10 75 25 C82 10 95 0 112 0 C132 0 150 12 150 35 C150 55 140 90 75 135 Z"
+        );
+        transform: none;
+        margin-top: 40px;
+      }
+      .heart:hover {
+        transform: scale(1.05);
+      }
+      .heart-wrap {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+      }
+      .heart.beat {
+        animation: beat 1s ease infinite;
+      }
+      @keyframes beat {
+        0%,
+        100% {
+          transform: scale(1);
+        }
+        50% {
+          transform: scale(1.08);
+        }
+      }
+      /* Flyer final */
+      #flyerWrap {
+        width: 100%;
+        display: none;
+        margin-top: 60px;
+        flex-direction: column;
+        align-items: center;
+        animation: fade 1s ease;
+      }
+      #flyerWrap.on {
+        display: flex;
+      }
+      #flyerFit {
+        position: relative;
+        width: 100%;
+        overflow: hidden;
+      }
+      #flyer {
+        width: 800px;
+        height: 1200px;
+        transform-origin: top left;
+        background: #f6f1e7;
+        color: #3b2a1e;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        padding: 56px 56px 48px;
+        box-sizing: border-box;
+        position: absolute;
+        top: 0;
+        left: 0;
+      }
+      #flyer .f-kick {
+        margin: 0;
+        font-size: 16px;
+        letter-spacing: 6px;
+        text-transform: uppercase;
+        color: #7b5ea7;
+      }
+      #flyer h3 {
+        margin: 8px 0 0;
+        font-family: "Great Vibes", cursive;
+        font-weight: 400;
+        font-size: 96px;
+        line-height: 1.1;
+        text-align: center;
+      }
+      #flyer .f-sub {
+        margin: 4px 0 0;
+        font-family: "Cormorant Garamond", serif;
+        font-style: italic;
+        font-size: 34px;
+        color: #e08a4b;
+      }
+      #flyer .grid {
+        width: 688px;
+        margin-top: 30px;
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        grid-template-rows: 180px 180px 180px;
+        gap: 18px;
+      }
+      #flyer .grid img {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+        border-radius: 16px;
+        box-shadow: 0 6px 18px rgba(59, 42, 30, 0.18);
+      }
+      #flyer .msg {
+        margin-top: 34px;
+        max-width: 620px;
+        text-align: center;
+      }
+      #flyer .msg p.big {
+        margin: 0;
+        font-family: "Cormorant Garamond", serif;
+        font-size: 32px;
+        line-height: 1.3;
+      }
+      #flyer .msg p.small {
+        margin: 16px 0 0;
+        font-size: 17px;
+        line-height: 1.7;
+      }
+      #flyer .f-foot {
+        margin: auto 0 0;
+        font-size: 14px;
+        letter-spacing: 4px;
+        text-transform: uppercase;
+        color: #7b5ea7;
+      }
+      .bar {
+        width: 100%;
+        max-width: 800px;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-top: 24px;
+      }
+    </style>
+  </head>
+  <body>
+    <main>
+      <!-- PASO 1 -->
+      <section class="step on" id="s1">
+        <p class="kicker">
+          Bienvenida a tu regalo sorpresa de aniversario, querida nonia.
+        </p>
+        <h1>Tenés una carta</h1>
+        <p class="lead">tocá el sobre para abrirla</p>
+        <div
+          class="envelope"
+          id="envelope"
+          role="button"
+          tabindex="0"
+          aria-label="Abrir el sobre"
+        >
+          <div class="env-card">Para vos</div>
+          <div class="env-body"></div>
+          <div class="env-flap"></div>
+        </div>
+        <p class="hint" id="envHint">&nbsp;</p>
+        <button id="btn1" disabled>Siguiente</button>
+      </section>
+
+      <!-- PASO 2 -->
+      <section class="step" id="s2">
+        <p class="kicker">Paso 2</p>
+        <h2>Prepara la mochilita</h2>
+        <p class="lead">tocá cada foto para ver qué va a pasar este finde</p>
+        <div class="memories" id="memories">
+          <button class="mem" data-i="0" aria-label="Revelar foto 1">
+            <div class="mem-inner">
+              <div class="mem-front">Tocame</div>
+              <div class="mem-back">
+                <img src="photos/casa.jpg" alt="La casa en Tandil" /><span
+                  >Nuestro nidito de amor</span
+                >
+              </div>
+            </div>
+          </button>
+          <button class="mem" data-i="1" aria-label="Revelar foto 2">
+            <div class="mem-inner">
+              <div class="mem-front">Tocame</div>
+              <div class="mem-back">
+                <img src="photos/pileta.jpg" alt="La pileta" /><span
+                  >Nuestra pelopincho</span
+                >
+              </div>
+            </div>
+          </button>
+          <button class="mem" data-i="2" aria-label="Revelar foto 3">
+            <div class="mem-inner">
+              <div class="mem-front">Tocame</div>
+              <div class="mem-back">
+                <img src="photos/hamaca.jpg" alt="La hamaca" /><span
+                  >Atardeceres juntos (gogogogo)</span
+                >
+              </div>
+            </div>
+          </button>
+          <button class="mem" data-i="3" aria-label="Revelar foto 4">
+            <div class="mem-inner">
+              <div class="mem-front">Tocame</div>
+              <div class="mem-back">
+                <img src="photos/parrilla.jpg" alt="La parrilla" /><span
+                  >Noche de asado</span
+                >
+              </div>
+            </div>
+          </button>
+        </div>
+        <p class="counter" id="counter">0 de 4</p>
+        <button id="btn2" class="ghost" disabled>Último paso</button>
+      </section>
+
+      <!-- PASO 3 -->
+      <section class="step" id="s3">
+        <p class="kicker">Último paso</p>
+        <h2>Esto es para vos</h2>
+        <p class="lead">tocá el corazón</p>
+        <div class="heart-wrap">
+          <button
+            class="heart beat"
+            id="heart"
+            aria-label="Ver tu sorpresa"
+          ></button>
+        </div>
+      </section>
+
+      <!-- FLYER FINAL -->
+      <section id="flyerWrap">
+        <p class="kicker">Tu sorpresa</p>
+        <div id="flyerFit">
+          <div id="flyer">
+            <p class="f-kick">Nos vamos a Tandil</p>
+            <h3>Feliz aniversario</h3>
+            <p class="f-sub">amorcito mío</p>
+            <div class="grid">
+              <img
+                src="photos/casa.jpg"
+                alt=""
+                style="grid-column: 1/2; grid-row: 1/3"
+              />
+              <img
+                src="photos/pileta.jpg"
+                alt=""
+                style="grid-column: 2/3; grid-row: 1/2"
+              />
+              <img
+                src="photos/hamaca.jpg"
+                alt=""
+                style="grid-column: 2/3; grid-row: 2/3"
+              />
+              <img
+                src="photos/parrilla.jpg"
+                alt=""
+                style="grid-column: 1/3; grid-row: 3/4"
+              />
+            </div>
+            <div class="msg">
+              <p class="big">Te amo hasta el infinito.</p>
+              <p class="small">
+                Eres el amor de mi vida. Hace dos años soy cada día más feliz
+                contigo, y así va a ser para siempre.
+              </p>
+            </div>
+            <p class="f-foot">Finde en Tandil · 2 años</p>
+          </div>
+        </div>
+      </section>
+    </main>
+
+    <script>
+      (function () {
+        function show(id) {
+          document.querySelectorAll(".step").forEach(function (s) {
+            s.classList.remove("on");
+          });
+          var el = document.getElementById(id);
+          el.classList.add("on");
+          el.scrollIntoView({ behavior: "smooth", block: "center" });
+        }
+
+        // Paso 1
+        var env = document.getElementById("envelope");
+        var btn1 = document.getElementById("btn1");
+        var hint = document.getElementById("envHint");
+        function openEnv() {
+          if (env.classList.contains("open")) return;
+          env.classList.add("open");
+          hint.textContent = "Adentro hay algo que tenés que ver";
+          btn1.disabled = false;
+        }
+        env.addEventListener("click", openEnv);
+        env.addEventListener("keydown", function (e) {
+          if (e.key === "Enter" || e.key === " ") {
+            e.preventDefault();
+            openEnv();
+          }
+        });
+        btn1.addEventListener("click", function () {
+          show("s2");
+        });
+
+        // Paso 2
+        var mems = document.querySelectorAll(".mem");
+        var seen = {};
+        var counter = document.getElementById("counter");
+        var btn2 = document.getElementById("btn2");
+        mems.forEach(function (m) {
+          m.addEventListener("click", function () {
+            var i = m.getAttribute("data-i");
+            m.classList.add("flipped");
+            seen[i] = true;
+            var n = Object.keys(seen).length;
+            counter.textContent = n + " de 4";
+            if (n === 4) {
+              btn2.disabled = false;
+              counter.textContent = "Todas reveladas";
+            }
+          });
+        });
+        btn2.addEventListener("click", function () {
+          show("s3");
+        });
+
+        // Paso 3
+        var heart = document.getElementById("heart");
+        heart.addEventListener("click", function () {
+          heart.classList.remove("beat");
+          var fw = document.getElementById("flyerWrap");
+          fw.classList.add("on");
+          fit();
+          fw.scrollIntoView({ behavior: "smooth", block: "start" });
+        });
+
+        // Ajustar el flyer al ancho de la pantalla
+        var flyer = document.getElementById("flyer");
+        var fit_el = document.getElementById("flyerFit");
+        function fit() {
+          var s = Math.min(1, fit_el.clientWidth / 800);
+          flyer.style.transform = "scale(" + s + ")";
+          fit_el.style.height = 1200 * s + "px";
+        }
+        window.addEventListener("resize", fit);
+      })();
+    </script>
+  </body>
+</html>
