@@ -293,7 +293,7 @@
       }
       #flyer {
         width: 800px;
-        height: 1200px;
+        min-height: 1200px;
         transform-origin: top left;
         background: #f6f1e7;
         color: #3b2a1e;
@@ -332,16 +332,67 @@
         width: 688px;
         margin-top: 30px;
         display: grid;
-        grid-template-columns: 1fr 1fr;
-        grid-template-rows: 180px 180px 180px;
-        gap: 18px;
+        grid-template-columns: repeat(3, 1fr);
+        grid-auto-rows: 100px;
+        grid-auto-flow: dense;
+        gap: 14px;
       }
-      #flyer .grid img {
+      #flyer .tile {
+        margin: 0;
+        padding: 6px;
+        background: #fff;
+        border-radius: 12px;
+        box-shadow: 0 6px 18px rgba(59, 42, 30, 0.18);
+        transform: rotate(var(--r));
+        animation:
+          pop 0.7s cubic-bezier(0.34, 1.56, 0.64, 1) var(--delay) both,
+          sway var(--dur) ease-in-out calc(var(--delay) + 0.7s) infinite
+            alternate;
+        cursor: pointer;
+        perspective: 800px;
+      }
+      #flyer .tile img {
+        display: block;
         width: 100%;
         height: 100%;
         object-fit: cover;
-        border-radius: 16px;
-        box-shadow: 0 6px 18px rgba(59, 42, 30, 0.18);
+        object-position: center 30%;
+        border-radius: 8px;
+      }
+      #flyer .tile.spin img {
+        animation: spinY 1.1s ease-in-out;
+      }
+      @keyframes pop {
+        from {
+          opacity: 0;
+          transform: scale(0.2) rotate(calc(var(--r) * -8));
+        }
+        to {
+          opacity: 1;
+          transform: scale(1) rotate(var(--r));
+        }
+      }
+      @keyframes sway {
+        from {
+          transform: translateY(0) rotate(var(--r));
+        }
+        to {
+          transform: translateY(-6px) rotate(calc(var(--r) * -1));
+        }
+      }
+      @keyframes spinY {
+        from {
+          transform: rotateY(0);
+        }
+        to {
+          transform: rotateY(360deg);
+        }
+      }
+      @media (prefers-reduced-motion: reduce) {
+        #flyer .tile,
+        #flyer .tile.spin img {
+          animation: none;
+        }
       }
       #flyer .msg {
         margin-top: 34px;
@@ -361,6 +412,7 @@
       }
       #flyer .f-foot {
         margin: auto 0 0;
+        padding-top: 32px;
         font-size: 14px;
         letter-spacing: 4px;
         text-transform: uppercase;
@@ -473,28 +525,7 @@
             <p class="f-kick">Nos vamos a Tandil</p>
             <h3>Feliz aniversario</h3>
             <p class="f-sub">amorcito mío</p>
-            <div class="grid">
-              <img
-                src="photos/casa.jpg"
-                alt=""
-                style="grid-column: 1/2; grid-row: 1/3"
-              />
-              <img
-                src="photos/pileta.jpg"
-                alt=""
-                style="grid-column: 2/3; grid-row: 1/2"
-              />
-              <img
-                src="photos/hamaca.jpg"
-                alt=""
-                style="grid-column: 2/3; grid-row: 2/3"
-              />
-              <img
-                src="photos/parrilla.jpg"
-                alt=""
-                style="grid-column: 1/3; grid-row: 3/4"
-              />
-            </div>
+            <div class="grid" id="collage"></div>
             <div class="msg">
               <p class="big">Te amo hasta el infinito.</p>
               <p class="small">
@@ -578,9 +609,130 @@
         function fit() {
           var s = Math.min(1, fit_el.clientWidth / 800);
           flyer.style.transform = "scale(" + s + ")";
-          fit_el.style.height = 1200 * s + "px";
+          fit_el.style.height = flyer.offsetHeight * s + "px";
         }
         window.addEventListener("resize", fit);
+
+        // Collage: photos/sorpresa-1 ... sorpresa-16 (any common extension).
+        // Tile size is chosen from each photo's real orientation so
+        // nothing gets cropped too much.
+        var TOTAL = 16;
+        var EXTS = ["jpg", "JPG", "jpeg", "JPEG", "png", "PNG"];
+        var collage = document.getElementById("collage");
+        var items = [];
+        var pending = TOTAL;
+        function done() {
+          pending--;
+          if (pending === 0) layout();
+        }
+        // Packs photos in bands of 3 rows (P = portrait, L = landscape):
+        //   first band: big portrait 2x6 + 2 stacked portraits
+        //   [L 2x3 + P], alternating sides
+        //   [P, P, P]
+        function layout() {
+          var list = items.filter(function (it) {
+            return it.ok;
+          });
+          var row = 1;
+          var flip = false;
+          function place(it, col, w, r, h) {
+            it.tile.style.gridColumn = col + " / span " + w;
+            it.tile.style.gridRow = r + " / span " + h;
+          }
+          function take(kind) {
+            for (var k = 0; k < list.length; k++) {
+              if (list[k].kind === kind) return list.splice(k, 1)[0];
+            }
+            return null;
+          }
+          function pair(land, port) {
+            place(land, flip ? 2 : 1, 2, row, 3);
+            place(port, flip ? 1 : 3, 1, row, 3);
+            flip = !flip;
+          }
+          var portraits = list.filter(function (it) {
+            return it.kind === "P";
+          }).length;
+          if (list.length && list[0].kind === "P" && portraits >= 3) {
+            place(list.shift(), 1, 2, row, 6);
+            place(take("P"), 3, 1, row, 3);
+            place(take("P"), 3, 1, row + 3, 3);
+            row += 6;
+          }
+          while (list.length) {
+            var it = list.shift();
+            if (it.kind === "L") {
+              var mate = take("P");
+              if (mate) pair(it, mate);
+              else place(it, 1, 3, row, 3);
+            } else {
+              var group = [it];
+              while (group.length < 3) {
+                var more = take("P");
+                if (!more) break;
+                group.push(more);
+              }
+              if (group.length === 3) {
+                group.forEach(function (g, k) {
+                  place(g, k + 1, 1, row, 3);
+                });
+              } else if (group.length === 2) {
+                place(group[0], 1, 2, row, 3);
+                place(group[1], 3, 1, row, 3);
+              } else {
+                var land = take("L");
+                if (land) pair(land, it);
+                else place(it, 1, 3, row, 3);
+              }
+            }
+            row += 3;
+          }
+          fit();
+        }
+        for (var i = 0; i < TOTAL; i++) {
+          (function (i) {
+            var tile = document.createElement("figure");
+            tile.className = "tile";
+            tile.style.gridRow = "span 3";
+            tile.style.setProperty("--r", ((i % 2 ? 1 : -1) * (1 + (i % 3))) + "deg");
+            tile.style.setProperty("--delay", (0.3 + i * 0.12) + "s");
+            tile.style.setProperty("--dur", (2.6 + (i % 4) * 0.5) + "s");
+            var item = { tile: tile, ok: false, kind: "P" };
+            items.push(item);
+            var img = document.createElement("img");
+            img.alt = "";
+            var ext = 0;
+            img.onload = function () {
+              item.ok = true;
+              item.kind = img.naturalWidth / img.naturalHeight > 1.15 ? "L" : "P";
+              done();
+            };
+            img.onerror = function () {
+              ext++;
+              if (ext < EXTS.length) {
+                img.src = "photos/sorpresa-" + (i + 1) + "." + EXTS[ext];
+              } else {
+                tile.remove();
+                done();
+              }
+            };
+            img.src = "photos/sorpresa-" + (i + 1) + "." + EXTS[0];
+            tile.appendChild(img);
+            tile.addEventListener("click", function () {
+              spin(tile);
+            });
+            collage.appendChild(tile);
+          })(i);
+        }
+        function spin(tile) {
+          tile.classList.remove("spin");
+          void tile.offsetWidth;
+          tile.classList.add("spin");
+        }
+        setInterval(function () {
+          var tiles = collage.querySelectorAll(".tile");
+          if (tiles.length) spin(tiles[Math.floor(Math.random() * tiles.length)]);
+        }, 2500);
       })();
     </script>
   </body>
